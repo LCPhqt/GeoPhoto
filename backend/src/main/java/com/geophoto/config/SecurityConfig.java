@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/photos/image/**").permitAll() // Allow public access to images
                         // Protected endpoints
                         .requestMatchers("/api/photos/**").authenticated()
                         // All other requests require authentication

@@ -293,7 +293,7 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
                   >
                     <div className="flex items-center gap-3">
                       <img
-                        src={`http://localhost:8080${photo.url}`}
+                        src={photo.url}
                         alt={photo.fileName}
                         className="w-12 h-12 object-cover rounded"
                       />
@@ -333,7 +333,7 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
                   </div>
                   <div className="flex items-center gap-3">
                     <img
-                      src={`http://localhost:8080${selectedPhoto.url}`}
+                      src={selectedPhoto.url}
                       alt={selectedPhoto.fileName}
                       className="w-16 h-16 object-cover rounded"
                     />
