@@ -187,20 +187,36 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
     setMessage(null)
   }
 
-  // Expose openPanel method to parent
+  // Expose methods to parent
   useImperativeHandle(ref, () => ({
+    // Mở panel danh sách ảnh không có GPS
     openPanel: () => {
       setShowPanel(true)
+    },
+    // Mở panel và tự động chọn ảnh theo ID
+    openWithPhoto: async (photoId) => {
+      setShowPanel(true)
+      // Đợi load xong photos rồi chọn
+      const allPhotos = await fetchAllPhotos()
+      const withoutGps = allPhotos.filter(p => !p.latitude || !p.longitude)
+      setPhotosWithoutGps(withoutGps)
+      
+      const targetPhoto = withoutGps.find(p => p.id === photoId)
+      if (targetPhoto) {
+        setSelectedPhoto(targetPhoto)
+        setTempMarkerPosition(null)
+        setShowSearch(true)
+      }
     }
   }))
 
-  // Don't show if no photos without GPS
-  if (photosWithoutGps.length === 0) return null
+  // Don't show toggle button if no photos without GPS (but still render if panel is open)
+  const hasPhotosWithoutGps = photosWithoutGps.length > 0
 
   return (
     <>
-      {/* Toggle Button */}
-      {!showPanel && (
+      {/* Toggle Button - chỉ hiển thị nếu có ảnh không có GPS và panel đang đóng */}
+      {hasPhotosWithoutGps && !showPanel && (
         <button
           onClick={() => setShowPanel(true)}
           className="fixed top-20 left-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg z-[1050] flex items-center gap-2 transition"

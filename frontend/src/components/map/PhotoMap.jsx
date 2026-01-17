@@ -67,6 +67,7 @@ const PhotoMap = () => {
     const lat = searchParams.get('lat')
     const lng = searchParams.get('lng')
     const photoId = searchParams.get('photoId')
+    const addGpsTo = searchParams.get('addGpsTo')
     
     if (lat && lng) {
       setTargetLocation({
@@ -74,6 +75,18 @@ const PhotoMap = () => {
         lng: parseFloat(lng),
         photoId
       })
+      // Clear the URL params
+      setSearchParams({})
+    }
+    
+    // Xử lý khi muốn thêm GPS cho ảnh cụ thể
+    if (addGpsTo) {
+      // Đợi một chút để component PhotosWithoutGPS mount xong
+      setTimeout(() => {
+        if (photosWithoutGPSRef.current) {
+          photosWithoutGPSRef.current.openWithPhoto(addGpsTo)
+        }
+      }, 500)
       // Clear the URL params
       setSearchParams({})
     }
