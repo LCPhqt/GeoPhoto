@@ -62,7 +62,7 @@ const PhotoDetails = ({ photo, onClose, onPhotoUpdated, onPhotoDeleted, onEditLo
   const handleDelete = async () => {
     try {
       setDeleting(true)
-      
+
       // Use photoService which includes JWT token
       await deletePhoto(photo.id)
 
@@ -122,7 +122,7 @@ const PhotoDetails = ({ photo, onClose, onPhotoUpdated, onPhotoDeleted, onEditLo
                   e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Found'
                 }}
               />
-              
+
               {/* Image Actions */}
               <div className="mt-4 flex gap-2">
                 <a

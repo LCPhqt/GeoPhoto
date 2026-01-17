@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { fetchAllPhotos, updatePhotoLocation } from '../../services/photoService'
+import { fetchAllPhotos, updatePhotoLocation, deletePhoto } from '../../services/photoService'
 import LocationSearch from '../map/LocationSearch'
 
 /**
@@ -14,9 +14,10 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
   const [tempMarkerPosition, setTempMarkerPosition] = useState(null)
   const [showSearch, setShowSearch] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false) // New state for deleting
   const [message, setMessage] = useState(null)
   const [showPanel, setShowPanel] = useState(false)
-  
+
   const map = useMap()
   const markerRef = useRef(null)
   const panelRef = useRef(null)
@@ -99,8 +100,8 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
     const handleMapClick = (e) => {
       // Only handle direct map clicks, not clicks on markers or UI elements
       if (e.originalEvent && e.originalEvent.target.classList.contains('leaflet-container')) {
-      setTempMarkerPosition([e.latlng.lat, e.latlng.lng])
-      setMessage({ type: 'info', text: 'Đã đặt marker. Kéo marker để điều chỉnh vị trí.' })
+        setTempMarkerPosition([e.latlng.lat, e.latlng.lng])
+        setMessage({ type: 'info', text: 'Đã đặt marker. Kéo marker để điều chỉnh vị trí.' })
       }
     }
 
@@ -146,10 +147,10 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
       )
 
       setMessage({ type: 'success', text: '✅ Đã lưu vị trí thành công!' })
-      
+
       // Reload photos
       await loadPhotosWithoutGps()
-      
+
       // Notify parent
       if (onLocationAdded) {
         onLocationAdded()
@@ -168,6 +169,81 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
       setMessage({ type: 'error', text: '❌ Lỗi khi lưu vị trí' })
     } finally {
       setSaving(false)
+    }
+  }
+
+  /**
+   * Handle get current location
+   */
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setMessage({ type: 'error', text: 'Trình duyệt không hỗ trợ Geolocation' })
+      return
+    }
+
+    setMessage({ type: 'info', text: 'Đang lấy vị trí hiện tại...' })
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        setTempMarkerPosition([latitude, longitude])
+        setMessage({ type: 'success', text: 'Đã lấy được vị trí hiện tại!' })
+
+        // Fly to location
+        map.flyTo([latitude, longitude], 16, {
+          animate: true,
+          duration: 1.5
+        })
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        let errorText = 'Không thể lấy vị trí.'
+        if (error.code === 1) errorText = 'Bạn đã từ chối quyền truy cập vị trí.'
+        else if (error.code === 2) errorText = 'Vị trí không khả dụng.'
+        else if (error.code === 3) errorText = 'Hết thời gian chờ lấy vị trí.'
+
+        setMessage({ type: 'error', text: errorText })
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
+  }
+
+  /**
+   * Handle delete photo
+   */
+  const handleDeletePhoto = async () => {
+    if (!selectedPhoto) return
+
+    if (window.confirm('Bạn có chắc chắn muốn xóa ảnh này không? Hành động này không thể hoàn tác.')) {
+      setDeleting(true)
+      setMessage({ type: 'info', text: 'Đang xóa ảnh...' })
+
+      try {
+        await deletePhoto(selectedPhoto.id)
+        setMessage({ type: 'success', text: '✅ Đã xóa ảnh thành công!' })
+
+        // Reload photos
+        await loadPhotosWithoutGps()
+
+        // Notify parent if needed
+        if (onLocationAdded) {
+          onLocationAdded() // Re-fetch counts
+        }
+
+        // Reset UI
+        setTimeout(() => {
+          setSelectedPhoto(null)
+          setTempMarkerPosition(null)
+          setShowSearch(false)
+          setMessage(null)
+        }, 1500)
+
+      } catch (error) {
+        console.error('Error deleting photo:', error)
+        setMessage({ type: 'error', text: '❌ Lỗi khi xóa ảnh' })
+      } finally {
+        setDeleting(false)
+      }
     }
   }
 
@@ -291,8 +367,19 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
             {selectedPhoto && (
               <div className="space-y-4">
                 {/* Selected Photo Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm font-medium text-blue-800 mb-2">Đang xử lý:</p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 relative group">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-sm font-medium text-blue-800">Đang xử lý:</p>
+                    <button
+                      onClick={handleCancel}
+                      className="text-blue-400 hover:text-red-500 transition-colors p-1 -mr-2 -mt-2 rounded-full hover:bg-blue-100"
+                      title="Hủy chọn ảnh"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="flex items-center gap-3">
                     <img
                       src={`http://${window.location.hostname}:8080${selectedPhoto.url}`}
@@ -309,12 +396,64 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
 
                 {/* Location Search */}
                 {showSearch && (
+                  <>
                   <LocationSearch
                     map={map}
                     onLocationSelected={handleLocationSelected}
                     onClose={() => setShowSearch(false)}
                   />
+                  
+                  {/* Get Current Location Button */}
+                  <div className="mt-2 text-center">
+                    <button
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          setMessage({ type: 'error', text: 'Trình duyệt không hỗ trợ Geolocation' })
+                          return
+                        }
+                        setMessage({ type: 'info', text: 'Đang lấy vị trí...' })
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            const { latitude, longitude } = position.coords
+                            setTempMarkerPosition([latitude, longitude])
+                            // Center map to new position
+                            map.flyTo([latitude, longitude], 15)
+                            setMessage({ type: 'success', text: '✅ Đã lấy vị trí hiện tại!' })
+                          },
+                          (error) => {
+                            console.error('Error getting location:', error)
+                            let msg = 'Không thể lấy vị trí.'
+                            if (error.code === 1) msg = 'Bạn đã từ chối quyền truy cập vị trí.'
+                            setMessage({ type: 'error', text: msg })
+                          },
+                          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        )
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-1 mx-auto py-1 px-3 rounded hover:bg-blue-50 transition"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Lấy vị trí hiện tại của tôi
+                    </button>
+                  </div>
+                  </>
                 )}
+
+                {/* Get Current Location Button */}
+                <button
+                  onClick={handleGetCurrentLocation}
+                  className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium group"
+                >
+                  <div className="p-1 bg-indigo-100 rounded-full group-hover:bg-indigo-200 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  Lấy vị trí hiện tại
+                </button>
 
                 {/* Instructions */}
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -329,34 +468,46 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
 
                 {/* Message */}
                 {message && (
-                  <div className={`p-3 rounded-lg text-sm ${
-                    message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
+                  <div className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
                     message.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
-                    'bg-blue-50 text-blue-800 border border-blue-200'
-                  }`}>
+                      'bg-blue-50 text-blue-800 border border-blue-200'
+                    }`}>
                     {message.text}
                   </div>
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
+                <div
+                  className="flex gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={handleDeletePhoto}
+                    disabled={saving || deleting}
+                    className="flex-none px-3 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition flex items-center justify-center"
+                    title="Xóa ảnh này"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                   <button
                     onClick={handleCancel}
                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                    disabled={saving}
+                    disabled={saving || deleting}
                   >
                     Hủy
                   </button>
                   <button
                     onClick={handleConfirmLocation}
-                    disabled={!tempMarkerPosition || saving}
-                    className={`flex-1 px-4 py-2 rounded-lg transition font-medium ${
-                      !tempMarkerPosition || saving
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-green-500 text-white hover:bg-green-600'
-                    }`}
+                    disabled={!tempMarkerPosition || saving || deleting}
+                    className={`flex-1 px-4 py-2 rounded-lg transition font-medium ${!tempMarkerPosition || saving || deleting
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600'
+                      }`}
                   >
-                    {saving ? 'Đang lưu...' : '✓ Xác Nhận Vị Trí'}
+                    {saving ? 'Đang lưu...' : (deleting ? 'Đang xóa...' : '✓ Xác Nhận Vị Trí')}
                   </button>
                 </div>
               </div>

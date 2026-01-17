@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         // Public share endpoints - cho phép xem link chia sẻ không cần đăng nhập
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/photos/image/**").permitAll() // Allow public access to images
                         // Protected endpoints
                         .requestMatchers("/api/photos/**").authenticated()
                         .requestMatchers("/api/shares/**").authenticated()
