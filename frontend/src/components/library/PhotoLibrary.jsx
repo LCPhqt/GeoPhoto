@@ -170,17 +170,17 @@ const PhotoLibrary = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-300 border-t-purple-600 mx-auto mb-6"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-gray-200 border-t-purple-600 mx-auto mb-6"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <svg className="w-10 h-10 text-purple-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-10 h-10 text-purple-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
-          <p className="text-xl text-purple-200 animate-pulse">Đang tải thư viện...</p>
+          <p className="text-xl text-gray-700 animate-pulse">Đang tải thư viện...</p>
         </div>
       </div>
     )
@@ -189,15 +189,15 @@ const PhotoLibrary = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center max-w-md border border-red-500/30">
-          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-red-200 shadow-lg">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Có lỗi xảy ra</h3>
-          <p className="text-gray-300 mb-6">{error}</p>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Có lỗi xảy ra</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={loadPhotos}
             className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition font-medium"
@@ -210,23 +210,23 @@ const PhotoLibrary = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
+      <header className="sticky top-0 z-50 bg-white backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo & Back button */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-purple-300 hover:text-white transition group"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition group"
               >
                 <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 <span className="hidden sm:inline">Bản đồ</span>
               </button>
-              <div className="h-6 w-px bg-white/20"></div>
+              <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -234,20 +234,20 @@ const PhotoLibrary = () => {
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Thư viện ảnh</h1>
-                  <p className="text-xs text-purple-300">{photos.length} ảnh</p>
+                  <h1 className="text-xl font-bold text-gray-900">Thư viện ảnh</h1>
+                  <p className="text-xs text-gray-500">{photos.length} ảnh</p>
                 </div>
               </div>
             </div>
 
             {/* User info & actions */}
             <div className="flex items-center gap-3">
-              <span className="text-sm text-purple-200 hidden sm:block">
+              <span className="text-sm text-gray-600 hidden sm:block">
                 {user?.fullName || user?.username}
               </span>
               <button
                 onClick={logout}
-                className="p-2 text-purple-300 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
+                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                 title="Đăng xuất"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,8 +265,8 @@ const PhotoLibrary = () => {
                 onClick={() => setFilter('all')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   filter === 'all'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white/10 text-purple-200 hover:bg-white/20'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 Tất cả ({photos.length})
@@ -275,8 +275,8 @@ const PhotoLibrary = () => {
                 onClick={() => setFilter('with-gps')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                   filter === 'with-gps'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white/10 text-purple-200 hover:bg-white/20'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -288,8 +288,8 @@ const PhotoLibrary = () => {
                 onClick={() => setFilter('without-gps')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                   filter === 'without-gps'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-white/10 text-purple-200 hover:bg-white/20'
+                    ? 'bg-orange-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,10 +300,10 @@ const PhotoLibrary = () => {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition ${viewMode === 'grid' ? 'bg-purple-600 text-white' : 'text-purple-200 hover:text-white'}`}
+                className={`p-2 rounded-md transition ${viewMode === 'grid' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
                 title="Dạng lưới"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -312,7 +312,7 @@ const PhotoLibrary = () => {
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition ${viewMode === 'list' ? 'bg-purple-600 text-white' : 'text-purple-200 hover:text-white'}`}
+                className={`p-2 rounded-md transition ${viewMode === 'list' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
                 title="Dạng danh sách"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -329,15 +329,15 @@ const PhotoLibrary = () => {
         {/* Empty State */}
         {filteredPhotos.length === 0 && (
           <div className="text-center py-20">
-            <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
               {filter === 'all' ? 'Chưa có ảnh nào' : 'Không có ảnh phù hợp'}
             </h3>
-            <p className="text-purple-300 mb-6">
+            <p className="text-gray-600 mb-6">
               {filter === 'all' 
                 ? 'Hãy quay lại bản đồ và upload ảnh đầu tiên của bạn!'
                 : 'Thử thay đổi bộ lọc để xem các ảnh khác.'}
@@ -360,7 +360,7 @@ const PhotoLibrary = () => {
             {filteredPhotos.map((photo) => (
               <div
                 key={photo.id}
-                className="group relative aspect-square rounded-xl overflow-hidden bg-white/5 cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20"
+                className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-2xl border-2 border-gray-300 hover:border-purple-400"
                 onClick={() => handlePhotoClick(photo)}
               >
                 {/* Image */}
@@ -468,11 +468,11 @@ const PhotoLibrary = () => {
             {filteredPhotos.map((photo) => (
               <div
                 key={photo.id}
-                className="flex items-center gap-4 bg-white/5 hover:bg-white/10 rounded-xl p-3 cursor-pointer transition group"
+                className="flex items-center gap-4 bg-white hover:bg-gray-50 rounded-xl p-3 cursor-pointer transition group border border-gray-200 shadow-sm"
                 onClick={() => handlePhotoClick(photo)}
               >
                 {/* Thumbnail */}
-                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                   <img
                     src={`http://${window.location.hostname}:8080${photo.url}`}
                     alt={photo.fileName}
@@ -485,8 +485,8 @@ const PhotoLibrary = () => {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-medium truncate">{photo.fileName}</h3>
-                  <p className="text-purple-300 text-sm">{formatDate(photo.uploadedAt)}</p>
+                  <h3 className="text-gray-900 font-medium truncate">{photo.fileName}</h3>
+                  <p className="text-gray-500 text-sm">{formatDate(photo.uploadedAt)}</p>
                   {photo.description && (
                     <p className="text-gray-400 text-sm truncate mt-1">{photo.description}</p>
                   )}
@@ -495,8 +495,8 @@ const PhotoLibrary = () => {
                 {/* GPS Status */}
                 <div className={`px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 ${
                   photo.latitude && photo.longitude
-                    ? 'bg-green-500/20 text-green-400'
-                    : 'bg-orange-500/20 text-orange-400'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-orange-100 text-orange-700'
                 }`}>
                   {photo.latitude && photo.longitude ? (
                     <>
@@ -521,7 +521,7 @@ const PhotoLibrary = () => {
                     e.stopPropagation()
                     setSharePhoto(photo)
                   }}
-                  className="p-2 text-gray-400 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition opacity-0 group-hover:opacity-100"
+                  className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition opacity-0 group-hover:opacity-100"
                   title="Chia sẻ"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -535,7 +535,7 @@ const PhotoLibrary = () => {
                     e.stopPropagation()
                     setAddToAlbumPhoto(photo)
                   }}
-                  className="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition opacity-0 group-hover:opacity-100"
+                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition opacity-0 group-hover:opacity-100"
                   title="Thêm vào album"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -549,7 +549,7 @@ const PhotoLibrary = () => {
                     e.stopPropagation()
                     setDeleteConfirm(photo)
                   }}
-                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition opacity-0 group-hover:opacity-100"
+                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition opacity-0 group-hover:opacity-100"
                   title="Xóa ảnh"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -564,24 +564,24 @@ const PhotoLibrary = () => {
 
       {/* No GPS Modal */}
       {selectedPhoto && !selectedPhoto.latitude && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-gray-200 shadow-2xl">
             <div className="text-center">
-              <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Ảnh chưa có vị trí GPS</h3>
-              <p className="text-gray-300 mb-6">
-                Ảnh "<span className="text-purple-400">{selectedPhoto.fileName}</span>" chưa có tọa độ GPS. 
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Ảnh chưa có vị trí GPS</h3>
+              <p className="text-gray-600 mb-6">
+                Ảnh "<span className="text-purple-600 font-medium">{selectedPhoto.fileName}</span>" chưa có tọa độ GPS. 
                 Bạn có thể thêm vị trí thủ công trên bản đồ.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setSelectedPhoto(null)}
-                  className="flex-1 px-4 py-2.5 bg-white/10 text-white rounded-xl hover:bg-white/20 transition font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium"
                 >
                   Đóng
                 </button>
@@ -605,23 +605,23 @@ const PhotoLibrary = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-gray-200 shadow-2xl">
             <div className="text-center">
-              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Xác nhận xóa ảnh?</h3>
-              <p className="text-gray-300 mb-6">
-                Bạn có chắc muốn xóa "<span className="text-red-400">{deleteConfirm.fileName}</span>"? 
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Xác nhận xóa ảnh?</h3>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc muốn xóa "<span className="text-red-600 font-medium">{deleteConfirm.fileName}</span>"? 
                 Hành động này không thể hoàn tác.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2.5 bg-white/10 text-white rounded-xl hover:bg-white/20 transition font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium"
                 >
                   Hủy
                 </button>
