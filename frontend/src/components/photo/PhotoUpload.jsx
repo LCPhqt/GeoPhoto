@@ -12,6 +12,9 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [location, setLocation] = useState(null)
+  const [gettingLocation, setGettingLocation] = useState(false)
+  const [locationError, setLocationError] = useState(null)
   const fileInputRef = React.useRef(null)
 
   /**
@@ -65,6 +68,44 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   }
 
   /**
+   * Lấy vị trí hiện tại
+   */
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Trình duyệt không hỗ trợ Geolocation')
+      return
+    }
+
+    setGettingLocation(true)
+    setLocationError(null)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('📍 Got location:', position.coords)
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+        setGettingLocation(false)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        let msg = 'Không thể lấy vị trí.'
+        if (error.code === 1) msg = 'Bạn đã từ chối quyền truy cập vị trí.'
+        else if (error.code === 2) msg = 'Không thể xác định vị trí.'
+        else if (error.code === 3) msg = 'Hết thời gian chờ lấy vị trí.'
+        setLocationError(msg)
+        setGettingLocation(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  }
+
+  /**
    * Xử lý upload
    */
   const handleUpload = async (event) => {
@@ -84,6 +125,13 @@ const PhotoUpload = ({ onUploadSuccess }) => {
 
     try {
       console.log('Calling uploadPhoto service...')
+      
+      // Attach location to file object if available
+      if (location) {
+        selectedFile.latitude = location.latitude
+        selectedFile.longitude = location.longitude
+      }
+      
       const result = await uploadPhoto(selectedFile, description)
       console.log('Upload success!', result)
       
@@ -143,6 +191,8 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     setSelectedFile(null)
     setPreview(null)
     setDescription('')
+    setLocation(null)
+    setLocationError(null)
     setMessage(null)
     setShowForm(false)
     if (fileInputRef.current) {
@@ -252,6 +302,81 @@ const PhotoUpload = ({ onUploadSuccess }) => {
                     </div>
                   </label>
                 </div>
+              </div>
+
+              {/* Location Input */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Vị Trí (GPS)
+                  </label>
+                  {location && (
+                     <button 
+                       type="button" 
+                       onClick={() => setLocation(null)}
+                       className="text-xs text-red-500 hover:text-red-700 font-medium"
+                     >
+                       Xóa vị trí
+                     </button>
+                  )}
+                </div>
+
+                {!location ? (
+                  <button
+                    type="button"
+                    onClick={handleGetLocation}
+                    disabled={gettingLocation}
+                    className={`w-full py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                      gettingLocation 
+                        ? 'bg-gray-100 text-gray-400 cursor-wait' 
+                        : 'bg-white border hover:bg-blue-50 hover:border-blue-300 text-blue-600 shadow-sm'
+                    }`}
+                  >
+                    {gettingLocation ? (
+                      <>
+                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang lấy vị trí...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        Lấy vị trí hiện tại
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-3">
+                    <div className="bg-green-100 p-1.5 rounded-full text-green-600 mt-0.5">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-800">Đã có vị trí!</p>
+                      <p className="text-xs text-green-600 mt-1 font-mono">
+                        {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {locationError && (
+                  <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {locationError}
+                  </p>
+                )}
               </div>
 
               {/* Image Preview */}

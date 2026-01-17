@@ -81,7 +81,9 @@ public class PhotoController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadPhoto(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "description", required = false) String description) {
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude) {
         
         // Validate file
         if (file.isEmpty()) {
@@ -101,7 +103,7 @@ public class PhotoController {
                 currentUser.getUsername(), file.getOriginalFilename(), file.getSize(), contentType);
         
         try {
-            PhotoDTO photo = photoService.uploadPhoto(file, description, currentUser);
+            PhotoDTO photo = photoService.uploadPhoto(file, description, latitude, longitude, currentUser);
             
             // Log GPS extraction result
             if (photo.getLatitude() != null && photo.getLongitude() != null) {

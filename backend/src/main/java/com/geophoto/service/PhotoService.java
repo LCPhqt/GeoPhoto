@@ -100,7 +100,7 @@ public class PhotoService {
      * @return PhotoDTO of the saved photo
      * @throws RuntimeException if file upload or processing fails
      */
-    public PhotoDTO uploadPhoto(MultipartFile file, String description, User user) {
+    public PhotoDTO uploadPhoto(MultipartFile file, String description, Double latitude, Double longitude, User user) {
         // Validate file
         if (file.isEmpty()) {
             throw new RuntimeException("File is empty");
@@ -133,28 +133,40 @@ public class PhotoService {
             photo.setDescription(description);
             photo.setUserId(user.getId());
             
-            // Extract GPS coordinates using ImageMetadataReader
             File imageFile = filePath.toFile();
-            try {
-                GeoLocation geoLocation = GpsExtractor.extractGpsCoordinates(imageFile);
-                
-                if (geoLocation != null) {
-                    photo.setLatitude(geoLocation.getLatitude());
-                    photo.setLongitude(geoLocation.getLongitude());
-                    log.info("GPS coordinates extracted - Lat: {}, Lon: {}", 
-                            geoLocation.getLatitude(), geoLocation.getLongitude());
-                } else {
-                    log.warn("No GPS coordinates found in image: {}", originalFilename);
-                    // Leave latitude and longitude as null
+            
+            // logic for GPS
+            if (latitude != null && longitude != null) {
+                // Use provided GPS
+                photo.setLatitude(latitude);
+                photo.setLongitude(longitude);
+                log.info("Using provided GPS coordinates - Lat: {}, Lon: {}", latitude, longitude);
+            } else {
+                // Extract GPS coordinates using ImageMetadataReader
+                try {
+                    GeoLocation geoLocation = GpsExtractor.extractGpsCoordinates(imageFile);
+                    
+                    if (geoLocation != null) {
+                        photo.setLatitude(geoLocation.getLatitude());
+                        photo.setLongitude(geoLocation.getLongitude());
+                        log.info("GPS coordinates extracted from EXIF - Lat: {}, Lon: {}", 
+                                geoLocation.getLatitude(), geoLocation.getLongitude());
+                    } else {
+                        log.warn("No GPS coordinates found in image: {}", originalFilename);
+                        // Leave latitude and longitude as null
+                    }
+                } catch (ImageProcessingException | IOException e) {
+                    log.error("Error extracting metadata from image: {}", originalFilename, e);
+                    // Continue saving photo without GPS data
                 }
-                
-                // Extract date taken
+            }
+            
+            // Extract date taken (always try to get from EXIF)
+            try {
                 LocalDateTime dateTaken = GpsExtractor.extractDateTaken(imageFile);
                 photo.setTakenAt(dateTaken);
-                
-            } catch (ImageProcessingException | IOException e) {
-                log.error("Error extracting metadata from image: {}", originalFilename, e);
-                // Continue saving photo without GPS data
+            } catch (Exception e) {
+                log.warn("Could not extract date taken from image: {}", e.getMessage());
             }
             
             // TODO: Generate thumbnail for map markers

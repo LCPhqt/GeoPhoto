@@ -309,11 +309,49 @@ const PhotosWithoutGPS = forwardRef(({ onLocationAdded }, ref) => {
 
                 {/* Location Search */}
                 {showSearch && (
+                  <>
                   <LocationSearch
                     map={map}
                     onLocationSelected={handleLocationSelected}
                     onClose={() => setShowSearch(false)}
                   />
+                  
+                  {/* Get Current Location Button */}
+                  <div className="mt-2 text-center">
+                    <button
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          setMessage({ type: 'error', text: 'Trình duyệt không hỗ trợ Geolocation' })
+                          return
+                        }
+                        setMessage({ type: 'info', text: 'Đang lấy vị trí...' })
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            const { latitude, longitude } = position.coords
+                            setTempMarkerPosition([latitude, longitude])
+                            // Center map to new position
+                            map.flyTo([latitude, longitude], 15)
+                            setMessage({ type: 'success', text: '✅ Đã lấy vị trí hiện tại!' })
+                          },
+                          (error) => {
+                            console.error('Error getting location:', error)
+                            let msg = 'Không thể lấy vị trí.'
+                            if (error.code === 1) msg = 'Bạn đã từ chối quyền truy cập vị trí.'
+                            setMessage({ type: 'error', text: msg })
+                          },
+                          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        )
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-1 mx-auto py-1 px-3 rounded hover:bg-blue-50 transition"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Lấy vị trí hiện tại của tôi
+                    </button>
+                  </div>
+                  </>
                 )}
 
                 {/* Instructions */}
